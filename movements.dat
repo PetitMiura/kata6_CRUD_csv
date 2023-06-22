@@ -1,2 +1,7 @@
-01/01/2023,"Sueldo",1000.00, EUR
-05/01/2023,"Pandereta", -20.00, EUR
+date,abstract,amount,currency
+2023-01-01,"Sueldo",1000,EUR
+2023-01-05,"Mi pandereta, que bonita",-20,EUR
+2023-01-06,"Lotería del niño",250,USD
+2023-06-12,lolailo,1000,EUR,Enviar
+2023-06-23,,,EUR,Enviar
+2023-06-05,Medio ambiente,-1000,EUR
