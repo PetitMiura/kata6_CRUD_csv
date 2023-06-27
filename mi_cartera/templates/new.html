@@ -1,35 +1,28 @@
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Cartera - Nuevo</title>
-</head>
-<body>
-    <nav>
-        <a href="/">Inicio</a>
-    </nav>
-    <main>
+{% extends "base.html" %}
+
+{%block content %}
         <h1>Nueva entrada</h1>
+
         <form action="/new_movement" method="post">
             <div>
                 <label for="date">
                     Fecha:
                 </label>
-                <input type="date" name="date" id="date">
+                <input type="date" name="date" id="date" value="{{ the_form.date }}">
             </div>
             <div>
                 <label for="abstract">
                     Concepto:
                 </label>
-                <input type="text" name="abstract" id="abstract">
+                <input type="text" name="abstract" id="abstract" value="{{ the_form.abstract }}">
             </div>
             <div>
                 <label for="amount">Cantidad:</label>
-                <input type="number" name="amount" id="amount" step="0.01">
+                <input type="number" name="amount" id="amount" step="0.01" value="{{ the_form.amount }}">
             </div>
             <div>
                 <label for="currency">Moneda:</label>
-                <select name="currency" id="currency">
+                <select name="currency" id="currency" selected="{{ the_form.currency }}">
                     <option value="EUR">Euros</option>
                     <option value="USD">Dólares americanos</option>
                 </select>
@@ -38,8 +31,4 @@
                 <input name="submit" id="submit" type="submit" value="Enviar">
             </div>
         </form>
-    </main>
-
-    
-</body>
-</html>
+ {% endblock %}

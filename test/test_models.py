@@ -21,16 +21,31 @@ def test_change_date():
     assert m.date == date(1970, 4, 8)
 
 def test_fails_if_amount_eq_zero():
-    pass
+    with pytest.raises(ValueError):
+        m = Movement("0003-01-01", "Concepto válido", 0, "EUR")
 
 def test_fails_if_amount_change_to_zero():
-    pass
+    m = Movement("0003-01-01", "Concepto valido", 1000, "EUR")
+    with pytest.raises(ValueError):
+        m.amount = 0
+
+def test_fails_if_amount_not_is_float():
+    with pytest.raises(ValueError):
+        m = Movement("0005-01-01", "Sueldo", "1000,25", "EUR")
+
+    m = Movement("0005-01-01", "sueldo", "1000.23", "EUR")
+    assert m.amount == 1000.23
+
 
 def test_fails_if_currency_not_in_currencies():
-    pass
+    with pytest.raises(ValueError):
+        m = Movement("0001-01-01", "Sueldo", 1000, "GBP")
+
 
 def test_fails_if_change_currency_not_in_currencies():
-    pass
+    m = Movement("0001-01-01", "Correccto", 1000, "EUR")
+    with pytest.raises(ValueError):
+        m.currency = "GBP"
 
 def test_create_dao():
     path = "cuaderno_de_mentira.dat"
@@ -74,8 +89,24 @@ def test_insert_one_movement():
     registros = list(reader)
 
     assert registros[0] == ["date", "abstract", "amount", "currency"]
-    assert registros[1] == ["2023-01-01", "Un concepto", "1", "EUR"]
+    assert registros[1] == ["2023-01-01", "Un concepto", "1.0", "EUR"]
 
 
+def test_all_movements():
+    path = "cuaderno_de_mentira.dat"
+    if os.path.exists(path):
+        os.remove(path)
 
+    dao = MovementDAO(path)
+    mvm1 = Movement("2023-01-01", "Un concepto1", 1, "EUR")
+    dao.insert(mvm1)
+    mvm2 = Movement("2023-01-02", "Un concepto2", 2, "EUR")
+    dao.insert(mvm2)
+    mvm3 = Movement("2023-01-03", "Un concepto3", 3, "EUR")
+    dao.insert(mvm3)
+
+    registers = dao.all()
+    assert registers[0] == mvm1
+    assert registers[1] == mvm2
+    assert registers[2] == mvm3
 
