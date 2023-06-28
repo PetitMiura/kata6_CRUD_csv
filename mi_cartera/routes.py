@@ -32,3 +32,20 @@ def new_mov():
 
       
 
+@app.route("/update_movement/<int:pos>", methods=["GET", "POST"])
+def upd_mov(pos):
+    if request.method == "GET":
+        mov = dao.get(pos)
+        return render_template("update.html", title="Modificación de movimiento",
+                               the_form=mov)
+    else:
+        data = request.form
+        try:
+            mv = Movement(data["date"], data["abstract"],
+                                data["amount"], data["currency"])
+            dao.update(pos, mv)
+        except ValueError as e:
+            flash(str(e))
+            return render_template("update.html", the_form=data, title="Modificación de movimiento")
+
+      

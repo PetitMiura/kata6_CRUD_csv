@@ -47,6 +47,7 @@ class Movement:
 
     def __repr__(self):
         return f"Movimiento: {self.date} - {self.abstract} - {self.amount} {self.currency}"
+
 class MovementDAO:
     def __init__(self, file_path):
         self.path = file_path
@@ -70,5 +71,41 @@ class MovementDAO:
             m = Movement(register["date"], register["abstract"], register["amount"], register["currency"])
             movements.append(m)
         return movements
+    
+    def get(self, pos):
+        f = open(self.path, "r")
+        reader = csv.DictReader(f, delimiter=",", quotechar='"')
+        ix = float("-inf")
+        for ix, register in enumerate(reader):
+            if ix == pos:
+                break
+
+        if pos > ix:
+            raise IndexError("movement don't exist")
+        
+        m = Movement(register["date"], register["abstract"], register["amount"], register["currency"])
+        return m
+
+    def update(self, pos, movement):
+        pass
+        """
+        1. Alternativa
+            - abrir el fichero original en lectura
+            - abrir otro fichero con nombre el que querais en escritura
+            - ir leyendo el fichero original y copiando cada registro en el nuevo
+            - hasta llegar a la posición pos, en que se escriben los datos de movement
+            - seguir copiando el resto de registros hasta el final
+            - borrar el fichero original 
+            - renombrar el fichero copia con el nombre de self.path
+
+        2. alternativa
+            - abrir el fichero en modo de escritura lectura
+            - leer hasta encontrar el registro
+            - sustituirlo (para eso tendrás que llevar el puntero de lectura a la posición inicila del
+            ultimo registro leido)
+            - cerrar y salir
+        """
+        
+
 
 
