@@ -87,7 +87,25 @@ class MovementDAO:
         return m
 
     def update(self, pos, movement):
-        pass
+        rows = []
+        with open(self.path, "r") as f:
+            reader = csv.DictReader(f, delimiter=",", quotechar='"')
+            for i, row in enumerate(reader):
+                if i == pos:
+                    row["date"] = movement.date
+                    row["abstract"] = movement.abstract
+                    row["amount"] = str(movement.amount)
+                    row["currency"] = movement.currency
+                rows.append(row)
+
+        with open(self.path, "w", newline="") as f:
+            writer = csv.writer(f, delimiter=",", quotechar='"')
+            writer.writerow(["date", "abstract", "amount", "currency"])
+            for row in rows:
+                writer.writerow([row["date"], row["abstract"], row["amount"], row["currency"]])
+        
+        f.close()
+        
         """
         1. Alternativa
             - abrir el fichero original en lectura
