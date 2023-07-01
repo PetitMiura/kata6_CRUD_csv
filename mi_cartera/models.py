@@ -87,6 +87,46 @@ class MovementDAO:
         return m
 
     def update(self, pos, movement):
+        f = open(self.path, "r")
+        reader = csv.DictReader(f, delimiter=",", quotechar='"')
+        regs = list(reader)
+        fieldnames = reader.fieldnames
+        f.close()
+        new_name = "__movements__new.csv"
+        f = open(new_name, "w", newline="")
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(regs[:pos])
+        writer.writerow({"date": movement.date, "abstract": movement.abstract, 
+                         "amount": movement.amount, "currency": movement.currency})
+        writer.writerows(regs[pos+1:])
+        f.close()
+        os.rename(new_name, self.path)
+        """
+        1. Alternativa
+            - abrir el fichero original en lectura
+            - abrir otro fichero con nombre el que querais en escritura
+            - ir leyendo el fichero original y copiando cada registro en el nuevo
+            - hasta llegar a la posición pos, en que se escriben los datos de movement
+            - seguir copiando el resto de registros hasta el final
+            - borrar el fichero original 
+            - renombrar el fichero copia con el nombre de self.path
+
+        2. alternativa
+            - abrir el fichero en modo de escritura lectura
+            - leer hasta encontrar el registro
+            - sustituirlo (para eso tendrás que llevar el puntero de lectura a la posición inicila del
+            ultimo registro leido)
+            - cerrar y salir
+        """
+        
+
+
+
+
+        return m
+    ''' Esta es mi manera de hacerlo junto con pablo
+    def update(self, pos, movement):
         rows = []
         with open(self.path, "r") as f:
             reader = csv.DictReader(f, delimiter=",", quotechar='"')
@@ -106,7 +146,7 @@ class MovementDAO:
         
         f.close()
         
-        """
+        
         1. Alternativa
             - abrir el fichero original en lectura
             - abrir otro fichero con nombre el que querais en escritura
@@ -122,7 +162,7 @@ class MovementDAO:
             - sustituirlo (para eso tendrás que llevar el puntero de lectura a la posición inicila del
             ultimo registro leido)
             - cerrar y salir
-        """
+        '''
         
 
 

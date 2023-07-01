@@ -10,11 +10,55 @@
 }
 
 header, footer {
-    background-color: var(--primary);
+    background: linear-gradient(to right, var(--primary) 0%, var(--secondary) 100%);
+    border-top-left-radius: 50%;
+    border-bottom-right-radius: 50%;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 1200px; /* Ajusta el valor según el ancho deseado */
 }
+
+body {
+    margin-top: 0px; /* Ajusta el valor según el tamaño de la cabecera */
+    margin-bottom: 0px; /* Ajusta el valor según el tamaño del pie */
+}
+
+
 
 header p, footer p {
     color: white;
     font-weight: bold;
     font-size: 1.2em;
 }
+
+/* Estilos para la tabla de movimientos */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 10px;
+    text-align: center;
+}
+
+th {
+    background-color: #e6bf11;
+    font-weight: bold;
+}
+
+tr{
+    background-color: #17ec22;
+}
+
+tr:hover {
+    background-color: #3bd15c;
+}
+
+/* Class Container para el html */
+
+.container {
+    max-width: 600px; /* Ajusta el valor según el ancho deseado */
+    margin: 0 auto; /* Centra horizontalmente el contenido */
+}
+  

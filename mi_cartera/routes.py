@@ -1,6 +1,6 @@
 from mi_cartera import app
 from mi_cartera.models import Movement, MovementDAO
-from flask import render_template, request, redirect, flash
+from flask import render_template, request, redirect, flash, url_for
 import csv
 
 dao = MovementDAO("movements.dat")
@@ -34,6 +34,26 @@ def new_mov():
 
 @app.route("/update_movement/<int:pos>", methods=["GET", "POST"])
 def upd_mov(pos):
+    if request.method == "GET":
+        mov = dao.get(pos)
+        return render_template("update.html", title="Modificación de movimiento",
+                               the_form=mov, pos=pos)
+    else:
+        data = request.form
+        try:
+            mv = Movement(data["date"], data["abstract"],
+                                data["amount"], data["currency"])
+            dao.update(pos, mv)
+            return redirect(url_for("index"))
+        except ValueError as e:
+            flash(str(e))
+            return render_template("update.html", the_form=data, title="Modificación de movimiento")
+
+      
+      
+''' mi manera de hacerlo junto con pablo
+@app.route("/update_movement/<int:pos>", methods=["GET", "POST"])
+def upd_mov(pos):
 
     if request.method == "GET":
         url_actual = request.url
@@ -48,7 +68,8 @@ def upd_mov(pos):
         except ValueError as e:
             flash(str(e))
             return render_template("update.html", the_form=data, title="Modificación de movimiento")
-
+'''
+        
         
     
 
