@@ -1,8 +1,9 @@
-from mi_cartera.models import Movement, MovementDAO
+from mi_cartera.models import Movement, MovementDAO, MovementsDAOsqlite
 from datetime import date
 import pytest
 import os
 import csv
+import sqlite3
 
 def test_create_movement():
     m = Movement("0002-01-31", "Sueldo", 1000, "EUR")
@@ -170,4 +171,59 @@ def test_update_movement():
 
     dao.update(1, mvm_mod )
     assert dao.get(1) == mvm_mod
+
+def test_create_dao_sqlite():
+    path = "base_cualquiera.db"
+    if os.path.exists(path):
+        os.remove(path)
+
+    dao = MovementsDAOsqlite(path)
+
+    conn = sqlite3.connect(path)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * from movements")
+    assert cursor.fetchall() == []
+    conn.close()
+
+def test_insertar_un_movimiento_sqlite():
+    path = "base_cualquiera.db"
+    if os.path.exists(path):
+        os.remove(path)
+
+    dao = MovementsDAOsqlite(path)
     
+    dao.insert(Movement("0001-01-01", "Concept", 12, "EUR"))
+    dao.insert(Movement("0001-01-02", "Concept", 12, "EUR"))
+
+    conn = sqlite3.connect(path)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * from movements")
+    assert cursor.fetchall() == [(1, "0001-01-01", "Concept", 12.0, "EUR"), 
+                                 (2, "0001-01-02", "Concept", 12.0, "EUR")]
+    conn.close()
+    
+def test_read_one_mov_sqlite():
+    path = "base_cualquiera.db"
+    if os.path.exists(path):
+        os.remove(path)
+
+    dao = MovementsDAOsqlite(path)
+    
+    dao.insert(Movement( "0001-01-01", "Concept", 12, "EUR"))
+    dao.insert(Movement( "0001-01-02", "Concept", 12, "EUR"))
+
+    assert dao.get(2) == Movement( "0001-01-02", "Concept", 12, "EUR", id=2)
+
+def test_readAllMovementsSqlite():
+    path = "base_cualquiera.db"
+    if os.path.exists(path):
+        os.remove(path)
+
+    dao = MovementsDAOsqlite(path)
+    
+    dao.insert(Movement( "0001-01-01", "Concept", 12, "EUR"))
+    dao.insert(Movement( "0001-01-02", "Concept", 12, "EUR"))    
+
+    movements = dao.get_all()
+    assert movements[0] == Movement( "0001-01-01", "Concept", 12, "EUR", id=1)
+    assert movements[1] == Movement( "0001-01-02", "Concept", 12, "EUR", id=2)

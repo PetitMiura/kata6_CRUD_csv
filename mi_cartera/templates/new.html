@@ -4,31 +4,26 @@
         <h1>Nueva entrada</h1>
 
         <form action="/new_movement" method="post">
+            {{ the_form.csrf_token }}
             <div>
-                <label for="date">
-                    Fecha:
-                </label>
-                <input type="date" name="date" id="date" value="{{ the_form.date }}">
+                {{ the_form.date.label }}
+                {{ the_form.date }}
+                {{ the_form.date.errors }}
             </div>
             <div>
-                <label for="abstract">
-                    Concepto:
-                </label>
-                <input type="text" name="abstract" id="abstract" value="{{ the_form.abstract }}">
+                {{ the_form.abstract.label }}
+                {{ the_form.abstract }}
             </div>
             <div>
-                <label for="amount">Cantidad:</label>
-                <input type="number" name="amount" id="amount" step="0.01" value="{{ the_form.amount }}">
+                {{ the_form.amount.label }}
+                {{ the_form.amount }}
             </div>
             <div>
-                <label for="currency">Moneda:</label>
-                <select name="currency" id="currency" selected="{{ the_form.currency }}">
-                    <option value="EUR">Euros</option>
-                    <option value="USD">Dólares americanos</option>
-                </select>
+                {{ the_form.currency.label }}
+                {{ the_form.currency }}
             </div>
             <div>
-                <input name="submit" id="submit" type="submit" value="Enviar">
+                {{ the_form.submit }}
             </div>
         </form>
  {% endblock %}

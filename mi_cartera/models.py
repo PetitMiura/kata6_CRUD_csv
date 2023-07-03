@@ -1,13 +1,15 @@
 from datetime import date
 import csv
 import os
+import sqlite3
 
 CURRENCIES = ("EUR", "USD")
 
 class Movement:
-    def __init__(self, input_date, abstract, amount, currency):
+    def __init__(self,  input_date, abstract, amount, currency, id=None):
+        
         self.date = input_date
-
+        self.id = id 
         self.abstract = abstract
         self.amount = amount
         self.currency = currency
@@ -101,69 +103,137 @@ class MovementDAO:
                          "amount": movement.amount, "currency": movement.currency})
         writer.writerows(regs[pos+1:])
         f.close()
+        os.remove(self.path)
         os.rename(new_name, self.path)
+
+
+
+class MovementsDAOsqlite:
+    def __init__(self, db_path):
+        self.path = db_path
+
+        query = """
+        CREATE TABLE IF NOT EXISTS "movements" (
+            "id"	INTEGER UNIQUE,
+            "date"	TEXT NOT NULL,
+            "abstract"	INTEGER NOT NULL,
+            "amount"	REAL NOT NULL,
+            "currency"	TEXT NOT NULL,
+            PRIMARY KEY("id" AUTOINCREMENT)
+        );
+       
         """
-        1. Alternativa
-            - abrir el fichero original en lectura
-            - abrir otro fichero con nombre el que querais en escritura
-            - ir leyendo el fichero original y copiando cada registro en el nuevo
-            - hasta llegar a la posición pos, en que se escriben los datos de movement
-            - seguir copiando el resto de registros hasta el final
-            - borrar el fichero original 
-            - renombrar el fichero copia con el nombre de self.path
+        conn = sqlite3.connect(self.path) 
+        cur = conn.cursor()
+        cur.execute(query)
+        conn.close()
+        
 
-        2. alternativa
-            - abrir el fichero en modo de escritura lectura
-            - leer hasta encontrar el registro
-            - sustituirlo (para eso tendrás que llevar el puntero de lectura a la posición inicila del
-            ultimo registro leido)
-            - cerrar y salir
+    def insert(self, movement):
+        
+        
+        query = """
+        INSERT INTO movements
+                (date, abstract, amount, currency)
+        VALUES  (?,?,?,?)
         """
+        conn = sqlite3.connect(self.path)
+        cur= conn.cursor()
+
+        cur.execute(query,(movement.date, movement.abstract,
+                           movement.amount, movement.currency))
         
+        conn.commit()
+        conn.close()
 
+    def get(self, id):
+        query = """
+        SELECT date, abstract, amount, currency, id
+        FROM movements
+        WHERE id = ?;
+        """
+        conn = sqlite3.connect(self.path)
+        cur= conn.cursor()
 
-
-
-        return m
-    ''' Esta es mi manera de hacerlo junto con pablo
-    def update(self, pos, movement):
-        rows = []
-        with open(self.path, "r") as f:
-            reader = csv.DictReader(f, delimiter=",", quotechar='"')
-            for i, row in enumerate(reader):
-                if i == pos:
-                    row["date"] = movement.date
-                    row["abstract"] = movement.abstract
-                    row["amount"] = str(movement.amount)
-                    row["currency"] = movement.currency
-                rows.append(row)
-
-        with open(self.path, "w", newline="") as f:
-            writer = csv.writer(f, delimiter=",", quotechar='"')
-            writer.writerow(["date", "abstract", "amount", "currency"])
-            for row in rows:
-                writer.writerow([row["date"], row["abstract"], row["amount"], row["currency"]])
+        cur.execute(query, (id,))
+        res = cur.fetchone()
+        conn.close()
+        if res:
+            return Movement(*res)
         
-        f.close()
-        
-        
-        1. Alternativa
-            - abrir el fichero original en lectura
-            - abrir otro fichero con nombre el que querais en escritura
-            - ir leyendo el fichero original y copiando cada registro en el nuevo
-            - hasta llegar a la posición pos, en que se escriben los datos de movement
-            - seguir copiando el resto de registros hasta el final
-            - borrar el fichero original 
-            - renombrar el fichero copia con el nombre de self.path
+    def get_all(self):
+        query = """
+        SELECT date, abstract, amount, currency, id
+            FROM movements;
+        """#se puede poner un OORDER by el valor q quieras como date etc
+        conn = sqlite3.connect(self.path)
+        cur= conn.cursor()
 
-        2. alternativa
-            - abrir el fichero en modo de escritura lectura
-            - leer hasta encontrar el registro
-            - sustituirlo (para eso tendrás que llevar el puntero de lectura a la posición inicila del
-            ultimo registro leido)
-            - cerrar y salir
-        '''
-        
+        cur.execute(query)
+        res = cur.fetchall()
+        lista = []
+        for reg in res:
+            lista.append(Movement(*reg))       
+
+        #lista = [Movement(*reg) for reg in res], es la conversion de las 3 linias de arriba (list comprenhension) 
+
+        conn.close()
+        return lista
+
+    def update(self, id, movement):
+        query ="""
+        UPDATE movements
+            SET date = ?, abstract = ?, amount = ?, currency = ?
+        WHERE id = ?;
+        """
+        conn = sqlite3.connect(self.path)
+        cur= conn.cursor()
+
+        cur.execute(query, (movement.date, movement.abstract, movement.amount, movement.currency, id))
+        conn.commit()
+        conn.close()
+
+
+
+        ''' Esta es mi manera de hacerlo junto con pablo
+        def update(self, pos, movement):
+            rows = []
+            with open(self.path, "r") as f:
+                reader = csv.DictReader(f, delimiter=",", quotechar='"')
+                for i, row in enumerate(reader):
+                    if i == pos:
+                        row["date"] = movement.date
+                        row["abstract"] = movement.abstract
+                        row["amount"] = str(movement.amount)
+                        row["currency"] = movement.currency
+                    rows.append(row)
+
+            with open(self.path, "w", newline="") as f:
+                writer = csv.writer(f, delimiter=",", quotechar='"')
+                writer.writerow(["date", "abstract", "amount", "currency"])
+                for row in rows:
+                    writer.writerow([row["date"], row["abstract"], row["amount"], row["currency"]])
+            
+            f.close()
+            
+            
+            1. Alternativa
+                - abrir el fichero original en lectura
+                - abrir otro fichero con nombre el que querais en escritura
+                - ir leyendo el fichero original y copiando cada registro en el nuevo
+                - hasta llegar a la posición pos, en que se escriben los datos de movement
+                - seguir copiando el resto de registros hasta el final
+                - borrar el fichero original 
+                - renombrar el fichero copia con el nombre de self.path
+
+            2. alternativa
+                - abrir el fichero en modo de escritura lectura
+                - leer hasta encontrar el registro
+                - sustituirlo (para eso tendrás que llevar el puntero de lectura a la posición inicila del
+                ultimo registro leido)
+                - cerrar y salir
+            '''
+            
 
 
 

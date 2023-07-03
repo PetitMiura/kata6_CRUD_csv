@@ -1,14 +1,13 @@
 from mi_cartera import app
-from mi_cartera.models import Movement, MovementDAO
+from mi_cartera.models import Movement, MovementsDAOsqlite
 from flask import render_template, request, redirect, flash, url_for
-import csv
+from mi_cartera.forms import MovementForm
 
-dao = MovementDAO("movements.dat")
-
+dao = MovementsDAOsqlite("data/movements.db")
 @app.route("/")
 def index():
     try:
-        movements = dao.all()
+        movements = dao.get_all()
         return render_template("index.html", the_movements=movements, title="Todos")
     except ValueError as e:
         flash("Su fichero de datos está corrupto")
@@ -18,26 +17,32 @@ def index():
 
 @app.route("/new_movement", methods=["GET", "POST"])
 def new_mov():
+    form = MovementForm()
     if request.method == "GET":
-        return render_template("new.html", the_form = {}, title="Alta de movimiento")
+        return render_template("new.html", the_form = form, title="Alta de movimiento")
     else:
-        data = request.form
-        try:
-            dao.insert(Movement(data["date"], data["abstract"],
-                                data["amount"], data["currency"]))
-            return redirect("/")
-        except ValueError as e:
-            flash(str(e))
-            return render_template("new.html", the_form=data, title="Alta de movimiento")
-
+        if form.validate():
+            try:
+                dao.insert(Movement(str(form.date.data), form.abstract.data,
+                                    form.amount.data, form.currency.data))
+                return redirect("/")
+            except ValueError as e:
+                flash(str(e))
+                return render_template("new.html", the_form=form, title="Alta de movimiento")
+        else:
+            return render_template("new.html", the_form=form, title="Alta de movimiento")
       
 
 @app.route("/update_movement/<int:pos>", methods=["GET", "POST"])
 def upd_mov(pos):
     if request.method == "GET":
         mov = dao.get(pos)
-        return render_template("update.html", title="Modificación de movimiento",
+        if mov:
+            return render_template("update.html", title="Modificación de movimiento",
                                the_form=mov, pos=pos)
+        else:
+            flash(f"Registro {pos} inexistente")
+            return redirect(url_for("Index"))        
     else:
         data = request.form
         try:
@@ -47,7 +52,7 @@ def upd_mov(pos):
             return redirect(url_for("index"))
         except ValueError as e:
             flash(str(e))
-            return render_template("update.html", the_form=data, title="Modificación de movimiento")
+            return render_template("update.html", pos=pos, the_form=data, title="Modificación de movimiento")
 
       
       
