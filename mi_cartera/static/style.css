@@ -62,3 +62,8 @@ tr:hover {
     margin: 0 auto; /* Centra horizontalmente el contenido */
 }
   
+.error {
+    color:firebrick;
+    font-size: 0.8em;
+    font-weight: bold;
+}

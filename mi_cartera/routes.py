@@ -1,9 +1,10 @@
 from mi_cartera import app
 from mi_cartera.models import Movement, MovementsDAOsqlite
 from flask import render_template, request, redirect, flash, url_for
-from mi_cartera.forms import MovementForm
+from mi_cartera.forms import MovementForm, RegisterForm
 
-dao = MovementsDAOsqlite("data/movements.db")
+dao = MovementsDAOsqlite(app.config.get("PATH_SQLITE"))
+
 @app.route("/")
 def index():
     try:
@@ -31,6 +32,7 @@ def new_mov():
                 return render_template("new.html", the_form=form, title="Alta de movimiento")
         else:
             return render_template("new.html", the_form=form, title="Alta de movimiento")
+
       
 
 @app.route("/update_movement/<int:pos>", methods=["GET", "POST"])
@@ -39,10 +41,10 @@ def upd_mov(pos):
         mov = dao.get(pos)
         if mov:
             return render_template("update.html", title="Modificación de movimiento",
-                               the_form=mov, pos=pos)
+                                the_form=mov, pos=pos)
         else:
             flash(f"Registro {pos} inexistente")
-            return redirect(url_for("Index"))        
+            return redirect(url_for("index"))
     else:
         data = request.form
         try:
@@ -52,8 +54,20 @@ def upd_mov(pos):
             return redirect(url_for("index"))
         except ValueError as e:
             flash(str(e))
-            return render_template("update.html", pos=pos, the_form=data, title="Modificación de movimiento")
+            return render_template("update.html", the_form=data, title="Modificación de movimiento")
 
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    form = RegisterForm()
+    if request.method == "GET":
+        return render_template("example.html", the_form = form)
+    else:
+        if form.validate():
+            flash("Login correcto")
+            return redirect(url_for("index"))
+        else:
+            return render_template("example.html", the_form=form)
       
       
 ''' mi manera de hacerlo junto con pablo

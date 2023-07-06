@@ -6,24 +6,44 @@
         <form action="/new_movement" method="post">
             {{ the_form.csrf_token }}
             <div>
-                {{ the_form.date.label }}
-                {{ the_form.date }}
-                {{ the_form.date.errors }}
+               {{ the_form.date.label }}
+               {{ the_form.date }}
+               {% if the_form.date.errors %}
+                  {% for mensaje in the_form.date.errors %}
+               <p class="error">{{ mensaje }}</p>
+                  {% endfor %}
+               {% endif %}
+
             </div>
             <div>
-                {{ the_form.abstract.label }}
-                {{ the_form.abstract }}
+               {{ the_form.abstract.label }}
+               {{ the_form.abstract }}
+               {% if the_form.abstract.errors %}
+                  {% for mensaje in the_form.abstract.errors %}
+               <p class="error">{{ mensaje }}</p>
+                  {% endfor %}
+               {% endif %}
             </div>
             <div>
-                {{ the_form.amount.label }}
-                {{ the_form.amount }}
+               {{ the_form.amount.label }}
+               {{ the_form.amount(step=0.01, type="number", placeholder="Introduce un importe") }}
+               {% if the_form.amount.errors %}
+                  {% for mensaje in the_form.amount.errors %}
+               <p class="error">{{ mensaje }}</p>
+                  {% endfor %}
+               {% endif %}
             </div>
             <div>
-                {{ the_form.currency.label }}
-                {{ the_form.currency }}
+               {{ the_form.currency.label }}
+               {{ the_form.currency }}
+               {% if the_form.currency.errors %}
+                  {% for mensaje in the_form.currency.errors %}
+               <p class="error">{{ mensaje }}</p>
+                  {% endfor %}
+               {% endif %}
             </div>
             <div>
-                {{ the_form.submit }}
+               {{ the_form.submit}}
             </div>
         </form>
  {% endblock %}
